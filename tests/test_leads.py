@@ -46,3 +46,5 @@ def test_delete_lead():
     leads_service.create_lead(LeadCreate(name="Г", phone="4", email="g@test.com"))
     leads_service.delete_lead(1)
     assert leads_service.get_leads() == []
+
+# TODO: UPD TESTS
