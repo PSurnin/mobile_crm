@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from src.app.api.leads_router import lead_router
-from app.core.db.database import engine, Base
+from src.app.core.db.database import engine, Base
 
 app = FastAPI()
 
