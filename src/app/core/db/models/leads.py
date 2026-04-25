@@ -2,7 +2,7 @@ from datetime import datetime
 from sqlalchemy import String, Enum as SAEnum, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column
 from src.app.core.db.database import Base
-from src.app.core.schemas import LeadStatus  # твой Enum
+from src.app.core.schemas.leads import LeadStatus
 
 class LeadModel(Base):
     __tablename__ = "leads"

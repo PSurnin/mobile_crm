@@ -1,9 +1,8 @@
 import logging
-from src.app.core.schemas import LeadCreate, Lead, LeadStatus, LeadStatusUpdate
+from src.app.core.schemas.leads import LeadCreate, Lead, LeadStatus, LeadStatusUpdate
 from src.app.services.leads.state_machine import can_transition
-from src.app.core.db.models import LeadModel
-from src.app.core.db.database import get_session
-from fastapi import HTTPException, Depends
+from src.app.core.db.models.leads import LeadModel
+from fastapi import HTTPException
 from sqlalchemy import select, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -43,10 +42,8 @@ async def get_lead_by_id(
     lead_id: int,
     session: AsyncSession,
 ) -> Lead:
-    result = await session.execute(
-        select(LeadModel).where(LeadModel.id == lead_id)
-    )
-    lead = result.scalar_one_or_none()
+    lead = await session.get(LeadModel, lead_id)
+
     if not lead:
         raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
     return lead
@@ -56,10 +53,8 @@ async def update_lead_status(
     update: LeadStatusUpdate,
     session: AsyncSession,
 ) -> Lead:
-    result = await session.execute(
-        select(LeadModel).where(LeadModel.id == lead_id)
-    )
-    lead = result.scalar_one_or_none()
+    lead = await session.get(LeadModel, lead_id)
+
     if not lead:
         raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
 
@@ -89,15 +84,11 @@ async def delete_lead(
     lead_id: int,
     session: AsyncSession,
 ) -> None:
-        result = await session.execute(
-            select(LeadModel).where(LeadModel.id == lead_id)
-        )
-        lead = result.scalar_one_or_none()
+        lead = await session.get(LeadModel, lead_id)
 
         if not lead:
             raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
-        await session.execute(
-            delete(lead)
-        )
+
+        await session.delete(lead)
         await session.commit()
         logger.info(f"Lead {lead_id} deleted")

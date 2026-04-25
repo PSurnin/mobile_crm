@@ -1,5 +1,5 @@
 from enum import Enum
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 
 class LeadStatus(str, Enum):
     new = "new"
@@ -18,8 +18,7 @@ class Lead(BaseModel):
     email: EmailStr
     status: LeadStatus = LeadStatus.new
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class LeadStatusUpdate(BaseModel):
     status: LeadStatus

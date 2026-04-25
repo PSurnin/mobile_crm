@@ -1,4 +1,4 @@
-from src.app.core.schemas import LeadStatus
+from src.app.core.schemas.leads import LeadStatus
 
 LEAD_TRANSITIONS: dict[LeadStatus, list[LeadStatus]] = {
     LeadStatus.new: [LeadStatus.in_progress],
