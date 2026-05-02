@@ -1,94 +1,51 @@
 import logging
-from src.app.core.schemas.leads import LeadCreate, Lead, LeadStatus, LeadStatusUpdate
+from src.app.core.schemas.leads import LeadCreate, LeadStatus, LeadStatusUpdate
 from src.app.services.leads.state_machine import can_transition
 from src.app.core.db.models.leads import LeadModel
+from src.app.repositories.leads import LeadRepository
 from fastapi import HTTPException
-from sqlalchemy import select, delete
-from sqlalchemy.ext.asyncio import AsyncSession
+
 
 logger = logging.getLogger(__name__)
 
-_fake_db = []
-_id_counter = 1
+class LeadService:
+    def __init__(self, repo: LeadRepository):
+        self.repo = repo
 
-# TODO: LeadService - class based service/view - calls Repository
-# TODO: LeadRepository - all things about DB and model interaction
+    async def create_lead(self, data: LeadCreate) -> LeadModel:
+        return await self.repo.create_lead(data)
 
-async def create_lead(
-    data: LeadCreate,
-    session: AsyncSession,
-) -> Lead:
-    lead = LeadModel(status="new", **data.model_dump())
-    session.add(lead)
-    await session.commit()
-    await session.refresh(lead)
-    logger.info(f"New lead created: {lead}")
+    async def get_leads(self, status: LeadStatus | None = None) -> list[LeadModel]:
+        return await self.repo.get_all(status)
 
-    return lead
+    async def get_lead_by_id(self, lead_id: int) -> LeadModel:
+        lead = await self.repo.get_by_id(lead_id)
+        if not lead:
+            raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
+        return lead
 
-async def get_leads(
-    session: AsyncSession,
-    status: LeadStatus | None = None,
-) -> list[Lead]:
-    query = select(LeadModel)
-
-    if status:
-        query = query.where(LeadModel.status == status)
-
-    result = await session.execute(query)
-    return result.scalars().all()
-
-async def get_lead_by_id(
-    lead_id: int,
-    session: AsyncSession,
-) -> Lead:
-    lead = await session.get(LeadModel, lead_id)
-
-    if not lead:
-        raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
-    return lead
-
-async def update_lead_status(
-    lead_id: int,
-    update: LeadStatusUpdate,
-    session: AsyncSession,
-) -> Lead:
-    lead = await session.get(LeadModel, lead_id)
-
-    if not lead:
-        raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
-
-    if update.status == lead.status:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Lead already has status '{lead.status}'"
-        )
-
-    if not can_transition(lead.status, update.status):
-        raise HTTPException(
-            status_code=422,
-            detail=(
-                f"Cannot transition from '{lead.status}' to '{update.status}'. "
+    async def update_lead_status(self, lead_id: int, update: LeadStatusUpdate) -> LeadModel:
+        lead = await self.repo.get_by_id(lead_id)
+        if not lead:
+            raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
+        if update.status == lead.status:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Lead already has status '{lead.status}'"
             )
-        )
 
-    lead.status = update.status
+        if not can_transition(lead.status, update.status):
+            raise HTTPException(
+                status_code=422,
+                detail=(
+                    f"Cannot transition from '{lead.status}' to '{update.status}'. "
+                )
+            )
+        return await self.repo.update_status(lead, update.status)
 
-    await session.commit()
-    await session.refresh(lead)
-
-    logger.info(f"Lead {lead_id} status: {lead.status} → {update.status}")
-    return lead
-
-async def delete_lead(
-    lead_id: int,
-    session: AsyncSession,
-) -> None:
-        lead = await session.get(LeadModel, lead_id)
-
+    async def delete_lead(self, lead_id: int) -> None:
+        lead = await self.repo.get_by_id(lead_id)
         if not lead:
             raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
 
-        await session.delete(lead)
-        await session.commit()
-        logger.info(f"Lead {lead_id} deleted")
+        return await self.repo.delete(lead)

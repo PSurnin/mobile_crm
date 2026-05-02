@@ -13,6 +13,7 @@ class AuthService:
             raise HTTPException(status_code=400, detail="Email already registered")
         return await self.repo.create(data, hash_password(data.password))
 
+
     async def login(self, data: UserLogin) -> TokenResponse:
         user = await self.repo.get_by_email(data.email)
         if not user or not verify_password(data.password, user.password_hash):
