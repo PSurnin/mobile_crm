@@ -5,6 +5,7 @@ from src.app.services.leads import leads_service as service
 
 pytestmark = pytest.mark.asyncio
 
+# TODO: upd tests to work with repositories instead of services
 
 async def test_create_lead(session):
     data = LeadCreate(name="Иван", phone="+79991234567", email="ivan@test.com")

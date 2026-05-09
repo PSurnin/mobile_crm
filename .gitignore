@@ -16,3 +16,9 @@ mini_crm.db-wal
 
 # testing
 api_testing/
+
+# env
+.env
+
+# configs
+.vscode/
