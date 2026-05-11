@@ -15,7 +15,7 @@ def get_lead_service(
     session: AsyncSession = Depends(get_session),
     current_user: UserModel = Depends(get_current_user),
 ) -> LeadService:
-    return LeadService(LeadRepository(session, current_user))
+    return LeadService(LeadRepository(session), current_user.id)
 
 @router.post("/add", response_model=Lead)
 async def create_lead(

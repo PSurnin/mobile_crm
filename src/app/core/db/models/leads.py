@@ -14,10 +14,11 @@ class LeadModel(Base):
     status: Mapped[LeadStatus] = mapped_column(
         SAEnum(LeadStatus), default=LeadStatus.new
     )
-    assigned_to: Mapped[int | None] = mapped_column(ForeignKey("users.id"))
+    assigned_to: Mapped[int] = mapped_column(ForeignKey("users.id"))
     created_at: Mapped[datetime] = mapped_column(
         DateTime, server_default=func.now()
     )
+    telegram_id: Mapped[int | None] = mapped_column()
 
 
 # TODO: public id - 

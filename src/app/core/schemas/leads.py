@@ -22,3 +22,7 @@ class Lead(BaseModel):
 
 class LeadStatusUpdate(BaseModel):
     status: LeadStatus
+
+class BotLeadCreate(LeadCreate):
+    invite_token: str
+    telegram_id: int

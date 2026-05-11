@@ -1,1 +1,5 @@
-uv run uvicorn src.main:app --reload
+uv run uvicorn src.app.main:app --reload
+uv run pytest tests/ -v
+
+alembic revision --autogenerate -m "add bot fields"
+alembic upgrade head

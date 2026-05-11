@@ -1,9 +1,6 @@
 import httpx
 from src.tg_bot.config import settings
 
-API_URL = "http://localhost:8000"
-
-
 async def create_lead(
     invite_token: str,
     name: str,
@@ -15,7 +12,7 @@ async def create_lead(
         try:
             # TODO: API endpoint in main app
             response = await client.post(
-                f"{API_URL}/bot/leads/",
+                f"{settings.API_URL}/bot/leads/",
                 json={
                     "invite_token": invite_token,
                     "name": name,
