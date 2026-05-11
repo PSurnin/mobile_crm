@@ -1,9 +1,9 @@
 from aiogram import Router, F
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
-from src.app.api.leads_router import create_lead
-from src.bot.handlers.start import LeadForm
-from src.bot.keyboards.reply import phone_request_keyboard, remove_keyboard
+from src.tg_bot.services.lead_service import create_lead
+from src.tg_bot.handlers.start import LeadForm
+from src.tg_bot.keyboards.reply import phone_request_keyboard, remove_keyboard
 
 router = Router()
 

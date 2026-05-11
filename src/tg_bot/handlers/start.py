@@ -21,7 +21,9 @@ async def handle_start(message: Message, state: FSMContext):
         )
         return
 
+    # TODO: is invite token valid?
     invite_token = args[1]
+
     await state.update_data(invite_token=invite_token)
     await state.set_state(LeadForm.waiting_name)
     await message.answer("Привет! Как вас зовут?")

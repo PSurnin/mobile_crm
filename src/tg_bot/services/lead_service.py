@@ -1,5 +1,5 @@
 import httpx
-from src.app.core.config import settings
+from src.tg_bot.config import settings
 
 API_URL = "http://localhost:8000"
 

@@ -1,11 +1,11 @@
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher
-from src.app.core.config import settings
-from src.bot.handlers import start, lead
+from src.tg_bot.config import settings
+from src.tg_bot.handlers import start, lead
 
 
-# TODO: RedisStorage для деполя - хранить состояние пользователей
+# TODO: RedisStorage для деплоя - хранить состояние пользователей
 async def main():
     logging.basicConfig(level=logging.INFO)
 
