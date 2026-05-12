@@ -1,7 +1,9 @@
 from src.app.core.schemas.users import UserCreate
 from src.app.core.db.models.users import UserModel
+from src.app.core.utils import generate_public_token
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 
 class UserRepository:
     def __init__(self, session: AsyncSession):
@@ -18,6 +20,7 @@ class UserRepository:
             name=data.name,
             email=data.email,
             password_hash=password_hash,
+            invite_token=generate_public_token(),
         )
         self.session.add(user)
         await self.session.commit()

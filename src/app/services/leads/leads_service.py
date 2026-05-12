@@ -19,13 +19,13 @@ class LeadService:
     async def get_leads(self, status: LeadStatus | None = None) -> list[LeadModel]:
         return await self.repo.get_all(self.user_id, status)
 
-    async def get_lead_by_id(self, lead_id: int) -> LeadModel:
+    async def get_lead_by_id(self, lead_id: str) -> LeadModel:
         lead = await self.repo.get_by_id(self.user_id, lead_id)
         if not lead:
             raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
         return lead
 
-    async def update_lead_status(self, lead_id: int, update: LeadStatusUpdate) -> LeadModel:
+    async def update_lead_status(self, lead_id: str, update: LeadStatusUpdate) -> LeadModel:
         lead = await self.repo.get_by_id(self.user_id, lead_id)
         if not lead:
             raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
@@ -44,7 +44,7 @@ class LeadService:
             )
         return await self.repo.update_status(lead, update.status)
 
-    async def delete_lead(self, lead_id: int) -> None:
+    async def delete_lead(self, lead_id: str) -> None:
         lead = await self.repo.get_by_id(self.user_id, lead_id)
         if not lead:
             raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")

@@ -26,7 +26,7 @@ async def create_lead(
 
 @router.get("/get/{lead_id}", response_model=Lead)
 async def get_lead(
-    lead_id: int,
+    lead_id: str,
     service: LeadService = Depends(get_lead_service),
 ):
     return await service.get_lead_by_id(lead_id)
