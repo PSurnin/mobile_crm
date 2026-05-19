@@ -24,12 +24,12 @@ async def create_lead(
 ):
     return await service.create_lead(data)
 
-@router.get("/get/{lead_id}", response_model=Lead)
+@router.get("/get/{public_id}", response_model=Lead)
 async def get_lead(
-    lead_id: str,
+    public_id: str,
     service: LeadService = Depends(get_lead_service),
 ):
-    return await service.get_lead_by_id(lead_id)
+    return await service.get_lead_by_id(public_id)
 
 @router.get("/list", response_model=list[Lead])
 async def list_leads(
@@ -38,17 +38,17 @@ async def list_leads(
 ):
     return await service.get_leads(status=status)
 
-@router.patch("/update/{lead_id}/status", response_model=Lead)
+@router.patch("/update/{public_id}/status", response_model=Lead)
 async def update_lead_status(
-    lead_id: int,
+    public_id: str,
     update: LeadStatusUpdate,
     service: LeadService = Depends(get_lead_service),
 ):
-    return await service.update_lead_status(lead_id, update)
+    return await service.update_lead_status(public_id, update)
 
-@router.delete("/delete/{lead_id}", status_code=204)
+@router.delete("/delete/{public_id}", status_code=204)
 async def delete_lead(
-    lead_id: int,
+    public_id: str,
     service: LeadService = Depends(get_lead_service),
 ):
-    await service.delete_lead(lead_id)
+    await service.delete_lead(public_id)

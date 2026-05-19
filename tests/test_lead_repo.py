@@ -15,5 +15,5 @@ async def test_get_by_id_wrong_user(session, test_user):
         assigned_to=other_user.id
     )
 
-    result = await repo.get_by_id(test_user.id, lead.id)
+    result = await repo.get_by_public_id(test_user.id, lead.public_id)
     assert result is None

@@ -30,8 +30,8 @@ class LeadRepository:
 
         return lead
 
-    async def get_by_id(self, assigned_to: int, lead_id: str) -> LeadModel | None:
-        query = self._user_filter(assigned_to).where(LeadModel.public_id == lead_id)
+    async def get_by_public_id(self, assigned_to: int, public_id: str) -> LeadModel | None:
+        query = self._user_filter(assigned_to).where(LeadModel.public_id == public_id)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
