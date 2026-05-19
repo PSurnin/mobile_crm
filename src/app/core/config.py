@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     BOT_SECRET_KEY: str = "default_secret"
+    BOT_USERNAME: str = "бот"
 
     model_config = SettingsConfigDict(
         env_file=".env",

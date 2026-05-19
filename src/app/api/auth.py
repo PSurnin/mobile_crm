@@ -6,7 +6,7 @@ from fastapi import Depends
 from src.app.repositories.users import UserRepository
 from src.app.services.auth import AuthService
 
-router = APIRouter(prefix="/users", tags=["users"])
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 def get_auth_service(session: AsyncSession = Depends(get_session)) -> AuthService:
     return AuthService(UserRepository(session))
