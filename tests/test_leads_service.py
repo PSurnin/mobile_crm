@@ -15,7 +15,7 @@ async def test_get_leads_filter_by_status(lead_service):
     await lead_service.create_lead(LeadCreate(name="Б", phone="2", email="b@test.com"))
     await lead_service.update_lead_status(first_lead.public_id, LeadStatusUpdate(status=LeadStatus.in_progress))
 
-    result = await lead_service.get_leads(status=LeadStatus.new)
+    result = await lead_service.get_leads(status=LeadStatus.new, limit=50, offset=0)
     assert len(result) == 1
     assert result[0].name == "Б"
 

@@ -12,7 +12,7 @@ class LeadCreate(BaseModel):
     email: EmailStr
 
 class Lead(BaseModel):
-    id: int
+    public_id: str
     name: str
     phone: str
     email: EmailStr

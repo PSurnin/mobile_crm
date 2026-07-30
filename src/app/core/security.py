@@ -1,3 +1,4 @@
+import asyncio
 import bcrypt
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
@@ -6,11 +7,12 @@ SECRET_KEY = "af34352-asd314-sad12"  # TODO: env
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+async def hash_password(password: str) -> str:
+    hashed = await asyncio.to_thread(bcrypt.hashpw, password.encode(), bcrypt.gensalt())
+    return hashed.decode()
 
-def verify_password(plain: str, hashed: str) -> bool:
-    return bcrypt.checkpw(plain.encode(), hashed.encode())
+async def verify_password(plain: str, hashed: str) -> bool:
+    return await asyncio.to_thread(bcrypt.checkpw, plain.encode(), hashed.encode())
 
 def create_access_token(user_id: int, role: str) -> str:
     payload = {

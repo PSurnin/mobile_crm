@@ -22,7 +22,7 @@ async def create_lead_from_bot(
 ):
     # находим менеджера по invite_token
     user_repo = UserRepository(session)
-    manager = user_repo.get_by_invite_token(data.invite_token)
+    manager = await user_repo.get_by_invite_token(data.invite_token)
     if not manager:
         raise HTTPException(status_code=404, detail="Invalid invite token")
 

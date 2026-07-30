@@ -1,4 +1,6 @@
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi import APIRouter, Query
 from src.app.core.schemas.leads import LeadCreate, Lead, LeadStatusUpdate, LeadStatus
 from src.app.services.leads.leads_service import LeadService
 from src.app.repositories.leads import LeadRepository
@@ -29,14 +31,16 @@ async def get_lead(
     public_id: str,
     service: LeadService = Depends(get_lead_service),
 ):
-    return await service.get_lead_by_id(public_id)
+    return await service.get_lead_or_404(public_id)
 
 @router.get("/list", response_model=list[Lead])
 async def list_leads(
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+    offset: Annotated[int, Query(ge=0)] = 0,
     status: LeadStatus | None = None,
     service: LeadService = Depends(get_lead_service),
 ):
-    return await service.get_leads(status=status)
+    return await service.get_leads(status=status, limit=limit, offset=offset)
 
 @router.patch("/update/{public_id}/status", response_model=Lead)
 async def update_lead_status(

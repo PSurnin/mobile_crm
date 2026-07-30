@@ -16,8 +16,13 @@ class LeadService:
     async def create_lead(self, data: LeadCreate, telegram_id: int | None = None,) -> LeadModel:
         return await self.repo.create_lead(data, self.user_id, telegram_id)
 
-    async def get_leads(self, status: LeadStatus | None = None) -> list[LeadModel]:
-        return await self.repo.get_all(self.user_id, status)
+    async def get_leads(
+            self,
+            limit: int,
+            offset: int,
+            status: LeadStatus | None = None,
+        ) -> list[LeadModel]:
+        return await self.repo.get_all(self.user_id, limit, offset, status)
 
     async def get_lead_or_404(self, public_id: str) -> LeadModel:
         lead = await self.repo.get_by_public_id(self.user_id, public_id)
