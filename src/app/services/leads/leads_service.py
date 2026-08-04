@@ -16,19 +16,23 @@ class LeadService:
     async def create_lead(self, data: LeadCreate, telegram_id: int | None = None,) -> LeadModel:
         return await self.repo.create_lead(data, self.user_id, telegram_id)
 
-    async def get_leads(self, status: LeadStatus | None = None) -> list[LeadModel]:
-        return await self.repo.get_all(self.user_id, status)
+    async def get_leads(
+            self,
+            limit: int,
+            offset: int,
+            status: LeadStatus | None = None,
+        ) -> list[LeadModel]:
+        return await self.repo.get_all(self.user_id, limit, offset, status)
 
-    async def get_lead_by_id(self, lead_id: int) -> LeadModel:
-        lead = await self.repo.get_by_id(self.user_id, lead_id)
+    async def get_lead_or_404(self, public_id: str) -> LeadModel:
+        lead = await self.repo.get_by_public_id(self.user_id, public_id)
         if not lead:
-            raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
+            raise HTTPException(status_code=404, detail=f"Lead {public_id} not found")
         return lead
 
-    async def update_lead_status(self, lead_id: int, update: LeadStatusUpdate) -> LeadModel:
-        lead = await self.repo.get_by_id(self.user_id, lead_id)
-        if not lead:
-            raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
+    async def update_lead_status(self, public_id: str, update: LeadStatusUpdate) -> LeadModel:
+        lead = await self.get_lead_or_404(public_id)
+
         if update.status == lead.status:
             raise HTTPException(
                 status_code=400,
@@ -44,9 +48,7 @@ class LeadService:
             )
         return await self.repo.update_status(lead, update.status)
 
-    async def delete_lead(self, lead_id: int) -> None:
-        lead = await self.repo.get_by_id(self.user_id, lead_id)
-        if not lead:
-            raise HTTPException(status_code=404, detail=f"Lead {lead_id} not found")
+    async def delete_lead(self, public_id: str) -> None:
+        lead = await self.get_lead_or_404(public_id)
 
         return await self.repo.delete(lead)

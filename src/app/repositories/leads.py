@@ -30,15 +30,22 @@ class LeadRepository:
 
         return lead
 
-    async def get_by_id(self, assigned_to: int, lead_id: int) -> LeadModel | None:
-        query = self._user_filter(assigned_to).where(LeadModel.id == lead_id)
+    async def get_by_public_id(self, assigned_to: int, public_id: str) -> LeadModel | None:
+        query = self._user_filter(assigned_to).where(LeadModel.public_id == public_id)
         result = await self.session.execute(query)
         return result.scalar_one_or_none()
 
-    async def get_all(self, assigned_to:int, status: LeadStatus | None = None) -> list[LeadModel]:
+    async def get_all(
+            self,
+            assigned_to:int,
+            limit: int,
+            offset: int,
+            status: LeadStatus | None = None,
+        ) -> list[LeadModel]:
         query = self._user_filter(assigned_to)
         if status:
             query = query.where(LeadModel.status == status)
+        query = query.order_by(LeadModel.id).limit(limit).offset(offset)
         result = await self.session.execute(query)
         return list(result.scalars().all())
 

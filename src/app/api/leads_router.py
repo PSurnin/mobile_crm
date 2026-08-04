@@ -1,4 +1,6 @@
-from fastapi import APIRouter
+from typing import Annotated
+
+from fastapi import APIRouter, Query
 from src.app.core.schemas.leads import LeadCreate, Lead, LeadStatusUpdate, LeadStatus
 from src.app.services.leads.leads_service import LeadService
 from src.app.repositories.leads import LeadRepository
@@ -24,31 +26,33 @@ async def create_lead(
 ):
     return await service.create_lead(data)
 
-@router.get("/get/{lead_id}", response_model=Lead)
+@router.get("/get/{public_id}", response_model=Lead)
 async def get_lead(
-    lead_id: int,
+    public_id: str,
     service: LeadService = Depends(get_lead_service),
 ):
-    return await service.get_lead_by_id(lead_id)
+    return await service.get_lead_or_404(public_id)
 
 @router.get("/list", response_model=list[Lead])
 async def list_leads(
+    limit: Annotated[int, Query(ge=1, le=100)] = 50,
+    offset: Annotated[int, Query(ge=0)] = 0,
     status: LeadStatus | None = None,
     service: LeadService = Depends(get_lead_service),
 ):
-    return await service.get_leads(status=status)
+    return await service.get_leads(status=status, limit=limit, offset=offset)
 
-@router.patch("/update/{lead_id}/status", response_model=Lead)
+@router.patch("/update/{public_id}/status", response_model=Lead)
 async def update_lead_status(
-    lead_id: int,
+    public_id: str,
     update: LeadStatusUpdate,
     service: LeadService = Depends(get_lead_service),
 ):
-    return await service.update_lead_status(lead_id, update)
+    return await service.update_lead_status(public_id, update)
 
-@router.delete("/delete/{lead_id}", status_code=204)
+@router.delete("/delete/{public_id}", status_code=204)
 async def delete_lead(
-    lead_id: int,
+    public_id: str,
     service: LeadService = Depends(get_lead_service),
 ):
-    await service.delete_lead(lead_id)
+    await service.delete_lead(public_id)
