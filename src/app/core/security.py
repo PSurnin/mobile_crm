@@ -3,7 +3,8 @@ import bcrypt
 from jose import jwt, JWTError
 from datetime import datetime, timedelta
 
-SECRET_KEY = "af34352-asd314-sad12"  # TODO: env
+from src.app.core.config import settings
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
@@ -20,10 +21,10 @@ def create_access_token(user_id: int, role: str) -> str:
         "role": role,
         "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     }
-    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(payload, settings.SECRET_KEY, algorithm=ALGORITHM)
 
 def decode_token(token: str) -> dict:
     try:
-        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
     except JWTError:
         return None

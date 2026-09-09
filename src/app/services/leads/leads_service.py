@@ -1,9 +1,9 @@
 import logging
+from src.app.core.exceptions import LeadStatusError, LeadNotFound, InvalidStatusTransition
 from src.app.core.schemas.leads import LeadCreate, LeadStatus, LeadStatusUpdate
 from src.app.services.leads.state_machine import can_transition
 from src.app.core.db.models.leads import LeadModel
 from src.app.repositories.leads import LeadRepository
-from fastapi import HTTPException
 
 
 logger = logging.getLogger(__name__)
@@ -27,25 +27,18 @@ class LeadService:
     async def get_lead_or_404(self, public_id: str) -> LeadModel:
         lead = await self.repo.get_by_public_id(self.user_id, public_id)
         if not lead:
-            raise HTTPException(status_code=404, detail=f"Lead {public_id} not found")
+            raise LeadNotFound(public_id)
         return lead
 
     async def update_lead_status(self, public_id: str, update: LeadStatusUpdate) -> LeadModel:
         lead = await self.get_lead_or_404(public_id)
 
         if update.status == lead.status:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Lead already has status '{lead.status}'"
-            )
+            raise LeadStatusError(lead.status)
 
         if not can_transition(lead.status, update.status):
-            raise HTTPException(
-                status_code=422,
-                detail=(
-                    f"Cannot transition from '{lead.status}' to '{update.status}'. "
-                )
-            )
+            raise InvalidStatusTransition(lead.status, update.status)
+
         return await self.repo.update_status(lead, update.status)
 
     async def delete_lead(self, public_id: str) -> None:
