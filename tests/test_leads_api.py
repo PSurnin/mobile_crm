@@ -5,7 +5,6 @@ async def test_create_lead(async_client):
     assert response.json()["name"] == "John"
     assert response.json()["public_id"]
 
-
 async def test_get_lead(async_client, make_lead):
     fake_lead = await make_lead()
     response = await async_client.get(f"/leads/get/{fake_lead.public_id}")

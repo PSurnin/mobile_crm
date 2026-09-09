@@ -1,5 +1,5 @@
 import pytest
-from fastapi import HTTPException
+from src.app.core.exceptions import LeadNotFound
 from src.app.core.schemas.leads import LeadCreate, LeadStatusUpdate, LeadStatus
 
 
@@ -21,9 +21,9 @@ async def test_get_leads_filter_by_status(lead_service):
 
 
 async def test_get_lead_by_id_not_found(lead_service):
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(LeadNotFound) as exc:
         await lead_service.get_lead_or_404(999)
-    assert exc.value.status_code == 404
+    assert str(exc.value) == "Lead 999 not found"
 
 
 async def test_update_lead_status(lead_service):
@@ -36,6 +36,6 @@ async def test_delete_lead(lead_service):
     lead = await lead_service.create_lead(LeadCreate(name="Г", phone="4", email="g@test.com"))
     await lead_service.delete_lead(lead.public_id)
 
-    with pytest.raises(HTTPException) as exc:
+    with pytest.raises(LeadNotFound) as exc:
         await lead_service.get_lead_or_404(lead.public_id)
-    assert exc.value.status_code == 404
+    assert str(exc.value) == f"Lead {lead.public_id} not found"
