@@ -16,7 +16,6 @@ services:
 
   api:
     build: .
-    command: ["sh", "-c", "uv run alembic upgrade head && uv run uvicorn src.app.main:app --host 0.0.0.0 --port 8000"]
     depends_on:
       db:
         condition: service_healthy
@@ -25,8 +24,13 @@ services:
       SECRET_KEY: ${SECRET_KEY}
       BOT_SECRET_KEY: ${BOT_SECRET_KEY}
       BOT_USERNAME: ${BOT_USERNAME}
+    volumes:
+      - ./src:/app/src
+      - ./alembic:/app/alembic
+      - ./alembic.ini:/app/alembic.ini
     ports:
       - "8000:8000"
+    command: ["sh", "-c", "uv run alembic upgrade head && uv run uvicorn src.app.main:app --host 0.0.0.0 --port 8000"]
 
   bot:
     build: .
