@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from src.app.api import router
 from src.app.api.error_handlers import register_error_handlers
-from src.app.core.db.database import engine, Base
+from src.app.core.db.database import engine
 from src.app.core.logging import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -13,8 +13,6 @@ setup_logging()
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # --- startup ---
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     yield
     # --- shutdown ---
     await engine.dispose()

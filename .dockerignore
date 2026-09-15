@@ -1,0 +1,35 @@
+# Ignore version control files (highly recommended!)
+.git
+.gitignore
+
+# Ignore local dependencies
+node_modules
+__pycache__
+
+# Ignore secrets and environment configs
+.env
+*.pem
+*.key
+
+# Ignore logs and temporary files
+*.log
+tmp/
+
+# Ignore development/IDE settings
+.vscode
+.idea
+
+# Virtual environments
+.venv
+
+# testing
+api_testing/
+tests/
+
+# AI DOCS
+*.MD
+
+# db
+mini_crm.db
+mini_crm.db-shm
+mini_crm.db-wal

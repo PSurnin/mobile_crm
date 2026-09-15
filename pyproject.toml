@@ -8,6 +8,7 @@ dependencies = [
     "aiogram>=3.28.0",
     "aiosqlite>=0.22.1",
     "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
     "bcrypt>=5.0.0",
     "fastapi>=0.136.0",
     "httpx>=0.28.1",
