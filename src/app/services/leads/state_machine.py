@@ -1,9 +1,10 @@
 from src.app.core.schemas.leads import LeadStatus
 
 LEAD_TRANSITIONS: dict[LeadStatus, list[LeadStatus]] = {
-    LeadStatus.new: [LeadStatus.in_progress],
-    LeadStatus.in_progress: [LeadStatus.closed],
-    LeadStatus.closed: [],
+    LeadStatus.new: [LeadStatus.in_progress, LeadStatus.lost],
+    LeadStatus.in_progress: [LeadStatus.lost, LeadStatus.won],
+    LeadStatus.won: [],
+    LeadStatus.lost: [],
 }
 
 def can_transition(current: LeadStatus, new: LeadStatus) -> bool:
