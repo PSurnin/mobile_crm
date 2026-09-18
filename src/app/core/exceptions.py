@@ -26,3 +26,9 @@ class EmailAlreadyRegistered(DomainError):
 class InvalidCredentials(DomainError):
     def __init__(self):
         super().__init__("Invalid credentials")
+
+class RequiredFieldMissing(DomainError):
+    def __init__(self, field: str, status: LeadStatus):
+        self.field = field
+        self.status = status
+        super().__init__(f"'{field}' is required to move a lead to '{status.value}'")

@@ -1,5 +1,7 @@
+from datetime import datetime, timezone
 import logging
-from src.app.core.exceptions import LeadStatusError, LeadNotFound, InvalidStatusTransition
+
+from src.app.core.exceptions import LeadStatusError, LeadNotFound, InvalidStatusTransition, RequiredFieldMissing
 from src.app.core.schemas.leads import LeadCreate, LeadStatus, LeadStatusUpdate
 from src.app.services.leads.state_machine import can_transition
 from src.app.core.db.models.leads import LeadModel
@@ -39,7 +41,23 @@ class LeadService:
         if not can_transition(lead.status, update.status):
             raise InvalidStatusTransition(lead.status, update.status)
 
-        return await self.repo.update_status(lead, update.status)
+        if update.status == LeadStatus.in_progress:
+            lead.contacted_at = datetime.now(timezone.utc)
+        else:
+            if update.status == LeadStatus.won:
+                if update.amount is None:
+                    raise RequiredFieldMissing("amount", LeadStatus.won)
+                lead.amount = update.amount
+
+            if update.status == LeadStatus.lost:
+                if update.lost_reason is None:
+                    raise RequiredFieldMissing("lost_reason", LeadStatus.lost)
+                lead.lost_reason = update.lost_reason
+            lead.closed_at = datetime.now(timezone.utc)
+
+        lead.status = update.status
+
+        return await self.repo.update(lead)
 
     async def delete_lead(self, public_id: str) -> None:
         lead = await self.get_lead_or_404(public_id)

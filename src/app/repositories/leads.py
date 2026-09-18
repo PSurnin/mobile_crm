@@ -49,8 +49,8 @@ class LeadRepository:
         result = await self.session.execute(query)
         return list(result.scalars().all())
 
-    async def update_status(self, lead: LeadModel, new_status: LeadStatus) -> LeadModel:
-        lead.status = new_status
+    async def update(self, lead: LeadModel) -> LeadModel:
+        # TODO: check if important
         await self.session.commit()
         await self.session.refresh(lead)
         return lead

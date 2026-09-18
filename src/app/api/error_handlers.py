@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 from src.app.core.exceptions import (
     LeadNotFound, LeadStatusError, InvalidStatusTransition,
-    EmailAlreadyRegistered, InvalidCredentials,
+    EmailAlreadyRegistered, InvalidCredentials, RequiredFieldMissing,
 )
 
 logger = logging.getLogger(__name__)
@@ -25,6 +25,12 @@ async def invalid_transition_handler(request: Request, exc: InvalidStatusTransit
     return JSONResponse(
         status_code=422,
         content={"detail": f"Cannot transition from '{exc.lead_status.value}' to '{exc.update_status.value}'."},
+    )
+
+async def required_field_missing_handler(request: Request, exc: RequiredFieldMissing) -> JSONResponse:
+    return JSONResponse(
+        status_code=422,
+        content={"detail": str(exc)},
     )
 
 async def invalid_email_handler(request: Request, exc: EmailAlreadyRegistered) -> JSONResponse:
@@ -50,6 +56,7 @@ def register_error_handlers(app: FastAPI) -> None:
     app.add_exception_handler(LeadNotFound, lead_not_found_handler)
     app.add_exception_handler(LeadStatusError, invalid_lead_status_handler)
     app.add_exception_handler(InvalidStatusTransition, invalid_transition_handler)
+    app.add_exception_handler(RequiredFieldMissing, required_field_missing_handler)
     app.add_exception_handler(EmailAlreadyRegistered, invalid_email_handler)
     app.add_exception_handler(InvalidCredentials, invalid_credentials_handler)
     app.add_exception_handler(SQLAlchemyError, db_error_handler)
