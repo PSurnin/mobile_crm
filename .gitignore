@@ -14,9 +14,6 @@ mini_crm.db
 mini_crm.db-shm
 mini_crm.db-wal
 
-# testing
-api_testing/
-
 # env
 .env
 

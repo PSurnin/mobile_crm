@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 from decimal import Decimal
-from sqlalchemy import String, Enum as SAEnum, DateTime, func, ForeignKey, Numeric
+from sqlalchemy import BigInteger, String, Enum as SAEnum, DateTime, func, ForeignKey, Numeric
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.app.core.db.database import Base
@@ -24,7 +24,7 @@ class LeadModel(Base):
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    telegram_id: Mapped[int | None]
+    telegram_id: Mapped[int | None] = mapped_column(BigInteger)
     contacted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     amount: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))

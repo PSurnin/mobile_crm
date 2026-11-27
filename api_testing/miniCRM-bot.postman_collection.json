@@ -1,0 +1,474 @@
+{
+  "item": [
+    {
+      "request": {
+        "header": [],
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "url": "{{baseUrl}}/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "name": "01 Health"
+    },
+    {
+      "request": {
+        "body": {
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\r\n  \"name\": \"Demo Manager\",\r\n  \"email\": \"{{manager_email}}\",\r\n  \"password\": \"{{manager_password}}\"\r\n}",
+          "mode": "raw"
+        },
+        "header": [
+          {
+            "value": "application/json",
+            "key": "Content-Type"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "url": "{{baseUrl}}/auth/register"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));"
+            ]
+          }
+        }
+      ],
+      "name": "02 Register manager (once)"
+    },
+    {
+      "request": {
+        "body": {
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\r\n  \"password\": \"{{manager_password}}\",\r\n  \"email\": \"{{manager_email}}\"\r\n}",
+          "mode": "raw"
+        },
+        "header": [
+          {
+            "value": "application/json",
+            "key": "Content-Type"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "url": "{{baseUrl}}/auth/login"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) { const token = pm.response.json().access_token; pm.expect(token).to.be.a('string'); pm.collectionVariables.set('access_token', token); }"
+            ]
+          }
+        }
+      ],
+      "name": "03 Login manager"
+    },
+    {
+      "request": {
+        "header": [],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "value": "{{access_token}}",
+              "type": "string",
+              "key": "token"
+            }
+          ]
+        },
+        "method": "GET",
+        "url": "{{baseUrl}}/users/me"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "name": "04 Current manager"
+    },
+    {
+      "request": {
+        "header": [],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "value": "{{access_token}}",
+              "type": "string",
+              "key": "token"
+            }
+          ]
+        },
+        "method": "GET",
+        "url": "{{baseUrl}}/users/invite-link"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) { const token = pm.response.json().url.split('start=')[1]; pm.expect(token).to.be.a('string').and.not.be.empty; pm.collectionVariables.set('invite_token', decodeURIComponent(token.split('&')[0])); }"
+            ]
+          }
+        }
+      ],
+      "name": "05 Get invite link"
+    },
+    {
+      "request": {
+        "body": {
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\r\n  \"phone\": \"+79990000000\",\r\n  \"name\": \"Demo Lead\",\r\n  \"email\": \"lead@example.com\",\r\n  \"invite_token\": \"{{invite_token}}\",\r\n  \"telegram_id\": 3000000000\r\n}",
+          "mode": "raw"
+        },
+        "header": [
+          {
+            "value": "{{BOT_SECRET_KEY}}",
+            "key": "x-bot-secret"
+          },
+          {
+            "value": "application/json",
+            "key": "Content-Type"
+          }
+        ],
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "url": "{{baseUrl}}/bot/leads/"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 201', () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) { const id = pm.response.json().public_id; pm.expect(id).to.be.a('string'); pm.collectionVariables.set('lead_public_id', id); }"
+            ]
+          }
+        }
+      ],
+      "name": "06 Create bot lead (64-bit Telegram ID)"
+    },
+    {
+      "request": {
+        "header": [],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "value": "{{access_token}}",
+              "type": "string",
+              "key": "token"
+            }
+          ]
+        },
+        "method": "GET",
+        "url": "{{baseUrl}}/leads/list?status=new&limit=50&offset=0"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "name": "07 List new leads"
+    },
+    {
+      "request": {
+        "header": [],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "value": "{{access_token}}",
+              "type": "string",
+              "key": "token"
+            }
+          ]
+        },
+        "method": "GET",
+        "url": "{{baseUrl}}/leads/get/{{lead_public_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "name": "08 Get lead"
+    },
+    {
+      "request": {
+        "body": {
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\r\n  \"status\": \"in_progress\"\r\n}",
+          "mode": "raw"
+        },
+        "header": [
+          {
+            "value": "application/json",
+            "key": "Content-Type"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "value": "{{access_token}}",
+              "type": "string",
+              "key": "token"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "url": "{{baseUrl}}/leads/update/{{lead_public_id}}/status"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "name": "09 Start working on lead"
+    },
+    {
+      "request": {
+        "body": {
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\r\n  \"amount\": \"1500.00\",\r\n  \"status\": \"won\"\r\n}",
+          "mode": "raw"
+        },
+        "header": [
+          {
+            "value": "application/json",
+            "key": "Content-Type"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "value": "{{access_token}}",
+              "type": "string",
+              "key": "token"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "url": "{{baseUrl}}/leads/update/{{lead_public_id}}/status"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "name": "10 Mark lead won"
+    },
+    {
+      "request": {
+        "body": {
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\r\n  \"email\": \"lead@example.com\",\r\n  \"name\": \"Demo Lead\",\r\n  \"phone\": \"+79990000000\"\r\n}",
+          "mode": "raw"
+        },
+        "header": [
+          {
+            "value": "application/json",
+            "key": "Content-Type"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "value": "{{access_token}}",
+              "type": "string",
+              "key": "token"
+            }
+          ]
+        },
+        "method": "POST",
+        "url": "{{baseUrl}}/leads/add"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));",
+              "if (pm.response.code === 200) { const id = pm.response.json().public_id; pm.expect(id).to.be.a('string'); pm.collectionVariables.set('lead_public_id', id); }"
+            ]
+          }
+        }
+      ],
+      "name": "Alternative - Create lead manually"
+    },
+    {
+      "request": {
+        "body": {
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          },
+          "raw": "{\r\n  \"lost_reason\": \"Demo: customer changed plans\",\r\n  \"status\": \"lost\"\r\n}",
+          "mode": "raw"
+        },
+        "header": [
+          {
+            "value": "application/json",
+            "key": "Content-Type"
+          }
+        ],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "value": "{{access_token}}",
+              "type": "string",
+              "key": "token"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "url": "{{baseUrl}}/leads/update/{{lead_public_id}}/status"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
+      "name": "Alternative - Mark lead lost"
+    },
+    {
+      "request": {
+        "header": [],
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "value": "{{access_token}}",
+              "type": "string",
+              "key": "token"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "url": "{{baseUrl}}/leads/delete/{{lead_public_id}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 204', () => pm.response.to.have.status(204));"
+            ]
+          }
+        }
+      ],
+      "name": "Cleanup - Delete demo lead"
+    }
+  ],
+  "variable": [
+    {
+      "value": "http://localhost:8000",
+      "key": "baseUrl"
+    },
+    {
+      "value": "manager@example.com",
+      "key": "manager_email"
+    }
+  ],
+  "info": {
+    "description": "Run requests 01–10 in order. Skip registration for an existing manager. Set manager_email, manager_password and BOT_SECRET_KEY locally. Run cleanup only if you want to delete the selected demo lead.",
+    "name": "miniCRM Local Demo",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  }
+}
